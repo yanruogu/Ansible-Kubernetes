@@ -1,0 +1,8 @@
+- name: cp ca.pem to /etc/kubernetes/ssl
+  template: src=ca/ca.pem dest=/etc/kubernetes/ssl/ca.pem owner=root group=root mode=0644
+- name: cp ca-key.pem to /etc/kubernetes/ssl
+  template: src=ca/ca-key.pem dest=/etc/kubernetes/ssl/ca-key.pem owner=root group=root mode=0644
+- name: cp ca-csr.json to /etc/kubernetes/ssl
+  template: src=ca/ca-csr.json dest=/etc/kubernetes/ssl/ca-csr.json owner=root group=root mode=0644
+- name: cp ca-config.json to /etc/kubernetes/ssl
+  template: src=ca/ca-config.json dest=/etc/kubernetes/ssl/ca-config.json owner=root group=root mode=0644

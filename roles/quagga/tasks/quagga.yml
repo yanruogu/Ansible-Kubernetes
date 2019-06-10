@@ -1,0 +1,28 @@
+- name: install quagga
+  package: name=quagga state=present
+
+- name: cp daemons to /etc/quagga
+  template: src=daemons.j2 dest=/etc/quagga/daemons owner=root group=root mode=0644
+  notify: restart quagga
+
+- name: cp zebra.conf to /etc/quagga
+  template: src=zebra.conf.j2 dest=/etc/quagga/zebra.conf owner=root group=root mode=0644
+  notify: restart quagga
+
+- name: cp debian.conf to /etc/quagga
+  template: src=debian.conf.j2 dest=/etc/quagga/debian.conf owner=root group=root mode=0644
+
+- name: cp ospfd.conf to dest
+  template: src=ospfd.conf.j2 dest=/etc/quagga/ospfd.conf owner=root group=root mode=0644
+  notify: restart quagga
+
+# - name: cp quagga to /etc/init.d
+#   template: src=quagga.j2 dest=/etc/init.d/quagga owern=root group=root mode=0755
+#   notify: restart quagga
+
+#- name: daemon-reload
+#  command: systemctl daemon-reload
+
+- name: start quagga
+  systemd: name=quagga state=started enabled=true daemon_reload=yes
+  

@@ -1,0 +1,8 @@
+{
+{% if NETWORK_PLUGIN == "quagga" -%}
+  "bip": "{{ DOCKER_BIP |default('172.17.0.1/24') }}",
+  "ip-masq": {{ DOCKER_IP_MASQ |default('true') }},
+{%- endif -%}
+  "registry-mirrors": ["https://o0o4czij.mirror.aliyuncs.com"],
+  "log-driver": "journald"
+}

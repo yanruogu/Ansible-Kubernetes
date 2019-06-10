@@ -1,0 +1,15 @@
+- hosts: k8s-etcd
+  roles:
+    - etcd
+
+- hosts: k8s-master
+  roles:
+    - flannel
+    - k8s-common
+    - k8s-master
+
+- hosts: k8s-node
+  roles:
+    - flannel
+    - k8s-common
+    - k8s-node

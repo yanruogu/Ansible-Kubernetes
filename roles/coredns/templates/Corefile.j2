@@ -1,0 +1,16 @@
+.:53 {
+    kubernetes {{ CLUSTER_DNS_DOMAIN }} {
+        resyncperiod 10s
+        endpoint http://127.0.0.1:8080
+        pods verified
+        endpoint_pod_names
+        upstream /etc/resolv.conf
+    }
+    health :18080
+    log 
+    errors
+    prometheus :9153
+    proxy . /etc/resolv.conf
+    cache 30
+    reload 10s
+}

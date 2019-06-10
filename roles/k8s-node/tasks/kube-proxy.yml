@@ -1,0 +1,65 @@
+- name: ensure kube-proxy workdir
+  file:
+    path: /var/lib/kube-proxy
+    state: directory
+
+- name: cp kube-proxy-csr.json to /etc/kubernetes/ssl
+  template: 
+    src: kube-proxy/kube-proxy-csr.json.j2
+    dest: /etc/kubernetes/ssl/kube-proxy-csr.json
+    owner: root
+    group: root
+    mode: 0644
+
+- name: generate kube-proxy.pem and kube-proxy-key.pem
+  shell: /usr/local/bin/cfssl gencert -ca=/etc/kubernetes/ssl/ca.pem -ca-key=/etc/kubernetes/ssl/ca-key.pem -config=/etc/kubernetes/ssl/ca-config.json -profile=kubernetes  kube-proxy-csr.json | /usr/local/bin/cfssljson -bare kube-proxy
+  args:
+    chdir: /etc/kubernetes/ssl
+    creates: /etc/kubernetes/ssl/kube-proxy.pem
+
+- name: kubeproxy-set-cluster
+  command: /usr/local/bin/kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/ssl/ca.pem --embed-certs=true --server=https://{{ MASTER_IP }}:6443  --kubeconfig=kube-proxy.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: kubeproxy-set-credentials
+  command: /usr/local/bin/kubectl config set-credentials kube-proxy --client-certificate=/etc/kubernetes/ssl/kube-proxy.pem --client-key=/etc/kubernetes/ssl/kube-proxy-key.pem --embed-certs=true --kubeconfig=kube-proxy.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: kubeproxy-set-context
+  command: /usr/local/bin/kubectl config set-context default --cluster=kubernetes --user=kube-proxy --kubeconfig=kube-proxy.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: kubeproxy-use-context
+  command: /usr/local/bin/kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: cp kube-proxy bin file to /usr/local/bin
+  copy: 
+    src: k8s-node/kube-proxy
+    dest: /usr/local/bin/kube-proxy
+    owner: root
+    group: root
+    mode: 0755
+
+- name: load ip_vs
+  command: modprobe ip_vs
+
+- name: cp kube-proxy.service to /etc/systemd/system
+  template:
+    src: kube-proxy/kube-proxy.service.j2
+    dest: /etc/systemd/system/kube-proxy.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart kube-proxy
+
+- name: start kube-proxy
+  service: 
+    name: kube-proxy
+    state: started
+    enabled: yes
+    daemon_reload: yes

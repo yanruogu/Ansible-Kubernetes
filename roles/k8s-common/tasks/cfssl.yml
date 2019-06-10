@@ -1,0 +1,8 @@
+- name: cp cfssl-certinfo to /usr/local/bin/
+  copy: src=cfssl/cfssl-certinfo dest=/usr/local/bin/cfssl-certinfo owner=root group=root mode=0755
+
+- name: cp cfssljson to /usr/local/bin/
+  copy: src=cfssl/cfssljson dest=/usr/local/bin/cfssljson owner=root group=root mode=0755
+
+- name: cp cfssl to /usr/local/bin/
+  copy: src=cfssl/cfssl dest=/usr/local/bin/cfssl owner=root group=root mode=0755

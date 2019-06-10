@@ -1,0 +1,37 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+WorkingDirectory=/var/lib/kubelet
+ExecStartPre=-/bin/mkdir -p /sys/fs/cgroup/cpuset/system.slice/kubelet.service /sys/fs/cgroup/hugetlb/system.slice/kubelet.service
+ExecStart=/usr/local/bin/kubelet \
+  --eviction-hard=memory.available<1024Mi,nodefs.available<10%,nodefs.inodesFree<5% \
+  --system-reserved=cpu=0.5,memory=1G \
+  --kube-reserved=cpu=0.5,memory=1G \
+  --kube-reserved-cgroup=/system.slice/kubelet.service \
+  --system-reserved-cgroup=/system.slice \
+  --enforce-node-allocatable=pods,kube-reserved,system-reserved \
+  --address={{ NODE_IP }} \
+  --hostname-override={{ NODE_IP }} \
+  --cgroup-driver=cgroupfs \
+  --pod-infra-container-image={{ PAUSE_POD }} \
+  --experimental-bootstrap-kubeconfig=/etc/kubernetes/bootstrap.kubeconfig \
+  --kubeconfig=/etc/kubernetes/kubelet.kubeconfig \
+  --cert-dir=/etc/kubernetes/ssl \
+  --cluster-dns={{ CLUSTER_DNS_SVC_IP }} \
+  --cluster-domain={{ CLUSTER_DNS_DOMAIN }} \
+  --hairpin-mode=promiscuous-bridge \
+  --allow-privileged=true \
+  --fail-swap-on=false \
+  --serialize-image-pulls=false \
+  --max-pods={{ MAX_PODS }} \
+  --logtostderr=true \
+  --v=2 
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

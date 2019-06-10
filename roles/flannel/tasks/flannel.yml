@@ -1,0 +1,64 @@
+#- name: Download flanneld
+#  get_url:
+#    url: https://github.com/coreos/flannel/releases/download/{{ FLANNEL_VERSION}}/flannel-{{ FLANNEL_VERSION}}-linux-amd64.tar.gz
+#    dest: /tmp/flannel-{{ FLANNEL_VERSION }}-linux-amd64.tar.gz
+#- name: install flanneld
+#  shell:
+#    tar xf /tmp/flannel-{{ FLANNEL_VERSION}}-linux-amd64.tar.gz -C /usr/local/bin/
+#    && rm -f /tmp/flannel-{{ FLANNEL_VERSION }}-linux-amd64.tar.gz
+#
+- name: install flanneld
+  copy:
+    src: flannel/flanneld
+    dest: /usr/local/bin/flanneld
+    owner: root
+    group: root
+    mode: 0755
+- name: install mk-docker-opts.sh
+  copy:
+    src: flannel/mk-docker-opts.sh
+    dest: /usr/local/bin/mk-docker-opts.sh
+    owner: root
+    group: root
+    mode: 0755
+
+
+- name: cp flannel-etcd.sh to /usr/local/bin
+  template: 
+    src: flannel-etcd.sh.j2 
+    dest: /usr/local/bin/flannel-etcd.sh 
+    owner: root 
+    group: root 
+    mode: 0755
+
+- name: run flanneld-etcd.sh
+  shell: /usr/local/bin/flannel-etcd.sh
+  args:
+    removes: /usr/local/bin/etcdctl
+  
+- name: cp remove-docker0.sh to /usr/local/bin
+  template:
+    src: remove-docker0.sh.j2
+    dest: /usr/local/bin/remove-docker0.sh
+    owner: root
+    group: root
+    mode: 0755
+
+- name: cp flanneld.service to /etc/systemd/system
+  template: 
+    src: flanneld.service.j2 
+    dest: /etc/systemd/system/flanneld.service 
+    owner: root 
+    group: root 
+    mode: 0644
+  notify: 
+    - restart flanneld
+    - restart docker
+
+- name: start flanneld
+  systemd: 
+    name: flanneld 
+    state: started 
+    enabled: true 
+    daemon_reload: yes
+  

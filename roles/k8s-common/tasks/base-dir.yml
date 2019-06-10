@@ -1,0 +1,5 @@
+- name: ensure /etc/kubernetes exsit
+  file: path=/etc/kubernetes state=directory mode=0755 owner=root group=root
+- name: ensure /etc/kubernetes/ssl exsit
+  file: path=/etc/kubernetes/ssl state=directory mode=0755 owner=root group=root
+

@@ -1,0 +1,11 @@
+Description=coredns: The Coredns Server
+Documentation=https://coredns.io/
+
+[Service]
+ExecStart=/usr/local/bin/coredns -conf /etc/coredns/Corefile
+Restart=always
+StartLimitInterval=0
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

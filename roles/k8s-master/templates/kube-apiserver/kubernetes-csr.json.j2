@@ -1,0 +1,25 @@
+{
+  "CN": "kubernetes",
+  "hosts": [
+    "127.0.0.1",
+    "{{ NODE_IP }}",
+    "{{ CLUSTER_KUBERNETES_SVC_IP }}",
+    "kubernetes",
+    "kubernetes.default",
+    "kubernetes.default.svc",
+    "kubernetes.default.svc.{{ CLUSTER_DNS_DOMAIN }}"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "Hubei",
+      "L": "Wuhan",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ]
+}

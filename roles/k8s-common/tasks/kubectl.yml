@@ -1,0 +1,34 @@
+- name: cp admin-csr.json to /etc/kubernets/ssl
+  template: 
+    src: kubectl/admin-csr.json.j2
+    dest: /etc/kubernetes/ssl/admin-csr.json
+    owner: root
+    group: root
+    mode: 0644
+
+- name: genrate admin.pem and admin-key.pem
+  shell: /usr/local/bin/cfssl gencert -ca=/etc/kubernetes/ssl/ca.pem -ca-key=/etc/kubernetes/ssl/ca-key.pem -config=/etc/kubernetes/ssl/ca-config.json -profile=kubernetes admin-csr.json | /usr/local/bin/cfssljson -bare admin
+  args:
+    chdir: /etc/kubernetes/ssl
+    creates: /etc/kubernetes/ssl/admin.pem
+
+- name: cp kubectl bin file to /usr/local/bin
+  copy: 
+    src: kubectl/kubectl
+    dest: /usr/local/bin/kubectl
+    owner: root
+    group: root
+    mode: 0755
+
+- name: set-cluster
+  shell: /usr/local/bin/kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/ssl/ca.pem --embed-certs=true --server=https://{{ MASTER_IP }}:6443
+
+- name: set-credentials
+  shell: /usr/local/bin/kubectl config set-credentials admin --client-certificate=/etc/kubernetes/ssl/admin.pem --embed-certs=true --client-key=/etc/kubernetes/ssl/admin-key.pem
+
+- name: set-context
+  shell: /usr/local/bin/kubectl config set-context kubernetes --cluster=kubernetes --user=admin
+
+- name: use-context
+  shell: /usr/local/bin/kubectl config use-context kubernetes
+

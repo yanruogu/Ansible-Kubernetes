@@ -1,0 +1,20 @@
+[Unit]
+Description=Flanneld
+Documentation=https://github.com/coreos/flannel
+After=network.target
+Before=docker.service
+
+[Service]
+User=root
+ExecStartPost=/usr/local/bin/mk-docker-opts.sh
+ExecStart=/usr/local/bin/flanneld \
+--etcd-endpoints="{{ ETCD_ENDPOINTS }}" \
+--iface={{ NODE_IP }} \
+--ip-masq \
+--etcd-prefix=/coreos.com/network
+Restart=on-failure
+Type=notify
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

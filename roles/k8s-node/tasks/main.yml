@@ -1,0 +1,13 @@
+---
+# tasks file for /etc/ansible/roles/k8s-node
+- include: kubelet.yml
+- include: kube-proxy.yml
+
+- name: test approve
+  shell: /usr/local/bin/kubectl get csr | grep 'Pending'
+  register: result
+  ignore_errors: True
+
+- name: kubectl certificate approve
+  shell: /usr/local/bin/kubectl get csr | grep 'Pending' | awk 'NR>0{print $1}'| xargs /usr/local/bin/kubectl certificate approve
+  when: result.rc == 0 

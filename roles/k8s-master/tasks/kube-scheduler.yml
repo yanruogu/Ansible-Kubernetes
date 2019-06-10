@@ -1,0 +1,26 @@
+- name: cp kube-scheduler bin file to /usr/local/bin
+  copy:
+    src: k8s-master/kube-scheduler
+    dest: /usr/local/bin/kube-scheduler
+    owner: root
+    group: root
+    mode: 0755
+
+- name: cp kube-scheduler.service to /etc/systemd/system
+  template:
+    src: kube-scheduler/kube-scheduler.service.j2
+    dest: /etc/systemd/system/kube-scheduler.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart kube-scheduler
+
+#- name: daemon reload
+#  command: systemctl daemon-reload
+
+- name:  start kube-scheduler
+  systemd:
+    name: kube-scheduler
+    state: started
+    enabled: yes
+    daemon_reload: yes

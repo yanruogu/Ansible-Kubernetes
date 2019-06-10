@@ -1,0 +1,20 @@
+#!/bin/bash
+attempt=0
+while true; do
+  /usr/local/bin/etcdctl --no-sync -C {{ ETCD_ENDPOINTS }} get /coreos.com/network/config >/dev/null 2>&1
+  if [[ "$?" == 0 ]]; then
+    break
+  else
+    if (( attempt > 20 )); then
+      echo "timeout for waiting network config" > /var/log/flannel-error.log
+      exit 2
+    fi
+
+    /usr/local/bin/etcdctl --no-sync -C {{ ETCD_ENDPOINTS }} \
+    mk /coreos.com/network/config \
+    "{\"Network\":\"{{ POD_CIDR }}\",\"Backend\": {\"Type\": \"{{ FLANNEL_BACKEND_TYPE |default(vxlan) }}\"}}" >/dev/null 2>&1
+    attempt=$((attempt+1))
+    sleep 3
+  fi
+done
+wait

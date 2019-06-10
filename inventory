@@ -1,0 +1,17 @@
+[k8s:children]
+docker
+k8s-etcd
+k8s-master
+k8s-node
+
+[docker]
+10.1.61.159 ansible_ssh_port=22 DOCKER_BIP=172.30.0.1/26 DOCKERNET=172.30.0.0/26 LOCALNET=10.1.61.0/24 ETCD_NAME=test
+
+[k8s-master]
+10.1.61.159 
+
+[k8s-etcd]
+10.1.61.159 
+
+[k8s-node]
+10.1.61.159

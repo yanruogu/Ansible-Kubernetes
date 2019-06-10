@@ -1,0 +1,5 @@
+---
+# tasks file for /etc/ansible/roles/k8s-master
+- include: kube-apiserver.yml
+- include: kube-controller-manager.yml
+- include: kube-scheduler.yml

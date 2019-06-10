@@ -1,0 +1,57 @@
+- name: ensure kubelet workdir
+  file: 
+    path: /var/lib/kubelet
+    state: directory
+
+- name: test clusterrolebinding
+  shell: /usr/local/bin/kubectl get clusterrolebinding | grep kubelet-bootstrap
+  register: result
+  ignore_errors: True
+
+- name: cluster role binding
+  shell: /usr/local/bin/kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --user=kubelet-bootstrap
+  run_once: true
+  when: result.rc != 0
+- name: kubeconfig-set-cluster
+  command: /usr/local/bin/kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/ssl/ca.pem --embed-certs=true --server=https://{{ MASTER_IP }}:6443 --kubeconfig=bootstrap.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: kubeconfig-set-credentials
+  command: /usr/local/bin/kubectl config set-credentials kubelet-bootstrap --token={{ BOOTSTRAP_TOKEN }} --kubeconfig=bootstrap.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: kubeconfig-set-context
+  command: /usr/local/bin/kubectl config set-context default --cluster=kubernetes --user=kubelet-bootstrap --kubeconfig=bootstrap.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: kubeconfig-use-context
+  command: /usr/local/bin/kubectl config use-context default --kubeconfig=bootstrap.kubeconfig
+  args:
+    chdir: /etc/kubernetes
+
+- name: cp kubelet bin file to /usr/local/bin
+  copy: 
+    src: k8s-node/kubelet
+    dest: /usr/local/bin
+    owner: root
+    group: root
+    mode: 0755
+
+- name: cp kubelet.service to /etc/systemd/system
+  template:
+    src: kubelet/kubelet.service.j2
+    dest: /etc/systemd/system/kubelet.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart kubelet
+
+- name: start kubelet
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes
+    daemon_reload: yes

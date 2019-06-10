@@ -1,0 +1,53 @@
+# 选择使用的网络插件，目前支持flannel和quagga
+NETWORK_PLUGIN: "flannel"
+
+# 如果使用quagga作为网络插件，AREA用于指定ospf区域
+AREA: 0
+
+# 是否启用etcd cluster
+ETCD_CLUSTER: True
+
+# 用于kubelet认证的token
+BOOTSTRAP_TOKEN: "bbbf0533ac5cb878707738b92c3360e9"
+
+# etcd集群访问地址
+ETCD_ENDPOINTS: "http://10.1.61.175:2379,http://10.1.61.176:2379,http://10.1.61.177:2379"
+
+# etcd 集群初始化列表
+ETCD_CLUSTER_CONF: "etcd-node1=http://10.1.61.175:2380,etcd-node2=http://10.1.61.176:2380,etcd-node3=http://10.1.61.177:2380"
+
+# flannel版本号
+FLANNEL_VERSION: "v0.10.0"
+
+# flannel使用的backend type
+FLANNEL_BACKEND_TYPE: "host-gw"
+
+# 指定Pod ip地址段，使用Flannel作为网络插件的时候有用
+POD_CIDR: "10.253.0.0/16"
+
+# kubernetes node port的范围
+NODE_PORT_RANGE: "20000-40000"
+
+# kubernetes内部的pod使用的dns地址
+CLUSTER_DNS_SVC_IP: "10.1.61.130,10.1.61.136"
+
+# kubernetes service使用的ip地址段
+SERVICE_CIDR: "10.254.0.0/16"
+
+# Kubernetes 服务本身在集群内部的ip
+CLUSTER_KUBERNETES_SVC_IP: "10.254.0.1"
+
+# node节点的ip地址
+NODE_IP: "{{ ansible_default_ipv4.address }}"
+
+# kubernetes master ip地址
+MASTER_IP: "10.1.61.159"
+
+# kubernetes集群域名 
+CLUSTER_DNS_DOMAIN: "test01"
+
+# pause-amd64镜像地址
+PAUSE_POD: "registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0"
+
+# 限制一个节点上最多运行的pod数
+MAX_PODS: 60

@@ -1,0 +1,65 @@
+---
+# tasks file for /etc/ansible/roles/etcd
+- name: cp etcd binary to /usr/local/bin
+  copy: 
+    src: etcd/etcd
+    dest: /usr/local/bin/etcd
+    owner: root
+    group: root
+    mode: 0755
+
+- name: cp etcdctl binary to /usr/local/bin
+  copy: 
+    src: etcd/etcdctl
+    dest: /usr/local/bin/etcdctl
+    owner: root
+    group: root
+    mode: 0755
+
+- name: ensure /etc/etcd directory
+  file:
+    path: /etc/etcd
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+#- name: set NODE_IP var
+#  set_fact:
+#    NODE_IP="{{ ansible_default_ipv4.address }}"
+
+- name: ensure etcd data directory
+  file:
+    path: /var/lib/etcd
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: cp etcd config to /etc/etcd
+  template: 
+    src: etcd.conf.j2
+    dest: /etc/etcd/etcd.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: cp etcd service to /etc/systemd/system
+  template:
+    src: etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: 0755
+  notify:
+    - restart etcd
+
+#- name: daemon reload
+#  command: systemctl daemon-reload
+
+- name: start etcd
+  systemd:
+    name: etcd
+    state: started
+    enabled: yes
+    daemon_reload: yes

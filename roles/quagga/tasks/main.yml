@@ -1,0 +1,3 @@
+---
+# tasks file for /etc/ansible/roles/k8s-common
+- include: quagga.yml

@@ -1,0 +1,7 @@
+---
+# tasks file for /etc/ansible/roles/k8s-common
+#- include: quagga.yml
+- include: base-dir.yml
+- include: ca-file.yml
+- include: cfssl.yml
+- include: kubectl.yml

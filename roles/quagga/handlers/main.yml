@@ -1,0 +1,4 @@
+---
+# handlers file for /etc/ansible/roles/k8s-common
+- name: restart quagga
+  service: name=quagga state=restarted daemon_reload=yes

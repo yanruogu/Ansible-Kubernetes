@@ -1,0 +1,20 @@
+---
+- hosts: 10.1.61.159
+  remote_user: root
+  tasks:
+#  - name: clusterrolebinding
+#    shell: /usr/local/bin/kubectl get clusterrolebinding | grep kubelet-bootstrap
+#    register: result
+#    ignore_errors: True
+#
+#  - debug: var=result
+  - name: test approve
+    shell: /usr/local/bin/kubectl get csr | grep 'Pending'
+    register: result
+    ignore_errors: True
+  
+  - debug: var=result
+
+#  - name: test approve
+#    shell: /usr/local/bin/kubectl get csr | grep 'Pending' | awk 'NR>0{print $1}'| xargs /usr/local/bin/kubectl certificate approve
+

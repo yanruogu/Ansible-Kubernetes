@@ -1,0 +1,14 @@
+! -*- ospf -*-
+!
+! OSPFd sample configuration file
+!
+!
+hostname ospfd
+password zebra
+!enable password please-set-at-here
+!
+router ospf
+  network {{ LOCALNET }} area {{ AREA }}
+  network {{ DOCKERNET }} area {{ AREA }}
+!
+log stdout

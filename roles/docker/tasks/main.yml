@@ -1,0 +1,69 @@
+---
+# tasks file for /etc/ansible/roles/docker
+- name: install dependent packages
+  package: name={{ item }} state=present
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl 
+    - software-properties-common
+  when: ansible_distribution == "Ubuntu"
+    
+
+#- name: import docker-ce repo
+#  shell: curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add - && sudo add-apt-repository "deb [arch=amd64] http://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+#  when: ansible_distribution == "Ubuntu"
+
+- name: get docker-ce repo gpg key
+  get_url: url=http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg dest=/tmp/gpg
+  when: ansible_distribution == "Ubuntu"
+
+- name: add gpg key
+  shell: apt-key add /tmp/gpg
+  when: ansible_distribution == "Ubuntu"
+
+- name: add docker-ce repo
+  shell: add-apt-repository "deb [arch=amd64] http://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+  when: ansible_distribution == "Ubuntu"
+  
+- name: update ubuntu repo
+  shell: apt-get update warn=False
+  when: ansible_distribution == "Ubuntu"
+
+
+- name: install dependent packages
+  package: name={{ item }} state=present
+  with_items:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+  when: ansible_distribution == "CentOS"
+
+- name: import docker-ce repo
+  shell: yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo  
+  when: ansible_distribution == "CentOS"
+  
+- name: install docker-ce
+  package: name=docker-ce state=present
+
+- name: ensure /etc/docker directory
+  file: path=/etc/docker state=directory
+
+- name: cp daemon.json to dest
+  template: src=daemon.json.j2 dest=/etc/docker/daemon.json owner=root group=root mode=0644
+
+- name: cp docker.service to dest
+  template: src=docker.service.j2 dest=/lib/systemd/system/docker.service owner=root group=root mode=0755
+  notify: restart docker
+  when: ansible_distribution == "Ubuntu"
+
+- name: cp docker.service to dest
+  copy: src=docker.service dest=/usr/lib/systemd/system/docker.service owner=root group=root mode=0644
+  notify: restart docker
+  when: ansible_distribution == "CentOS"
+
+#- name: daemon-reload
+#  command: systemctl daemon-reload
+
+- name: start docker
+  systemd: name=docker.service state=started enabled=yes daemon_reload=yes
